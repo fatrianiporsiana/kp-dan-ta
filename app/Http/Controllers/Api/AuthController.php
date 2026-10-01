@@ -8,9 +8,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
-use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -18,7 +15,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'npm' => ['required', 'string', 'max:50', 'unique:users,npm'],
+            'nomor_induk' => ['required', 'string', 'max:50', 'unique:users,nomor_induk'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'role' => ['nullable', 'in:mahasiswa,dosen,admin'],
@@ -26,7 +23,7 @@ class AuthController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
-            'npm' => $validated['npm'],
+            'nomor_induk' => $validated['nomor_induk'],
             'email' => $validated['email'],
             'password' => $validated['password'],
             'role' => $validated['role'],
@@ -49,11 +46,13 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'email' => ['required', 'email'],
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::where('email', $validated['login'])
+            ->orwhere('nomor_induk', $validated['login'])
+            ->first();
 
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages([

@@ -28,3 +28,31 @@ Route::prefix('auth')->group(function () {
     });
 
 });
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/test/staff', function (Request $request) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Kamu berhasil masuk ke area staff.',
+            'user' => $request->user()->name,
+        ]);
+    })->middleware('role:staff');
+
+});
+
+Route::middleware(['auth:sanctum', 'full-access'])->group(function () {
+
+    Route::get('/test/full-access', function (Request $request) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Kamu berhasil masuk ke area full access.',
+            'user' => $request->user()->name,
+            'roles' => $request->user()
+                ->roles
+                ->pluck('name')
+                ->values(),
+        ]);
+    });
+
+});
