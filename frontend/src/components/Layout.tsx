@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Bell, ChevronDown, LogOut } from 'lucide-react';
 import { useAuth, ROLE_LABEL } from '../Auth';
 import { useDb } from '../store';
 
 type M = [string, string][];
 
-/** ═══════ Modul KP ═══════ */
+/* ═══════════════════════════════════════════════════════════
+   MENU MODUL KP
+   ═══════════════════════════════════════════════════════════ */
 
 const MENU_KP: Record<string, M> = {
   m: [
@@ -28,8 +30,11 @@ const MENU_KP: Record<string, M> = {
   ],
 };
 
-/** ═══════ Modul TA — role Mahasiswa ═══════ */
+/* ═══════════════════════════════════════════════════════════
+   MENU MODUL TA
+   ═══════════════════════════════════════════════════════════ */
 
+/** TA — Mahasiswa */
 const MENU_TA_M: M = [
   ['/app/ta', 'Dashboard TA'],
   ['/app/ta/pendaftaran', 'Pendaftaran TA'],
@@ -39,8 +44,7 @@ const MENU_TA_M: M = [
   ['/app/ta/penyelesaian', 'Penyelesaian TA'],
 ];
 
-/** ═══════ Modul TA — role Staff / Sekprodi / Kaprodi ═══════ */
-
+/** TA — Staff / Sekprodi / Kaprodi (sebagai staff TA) */
 const MENU_TA_S: M = [
   ['/app/ta', 'Dashboard Staff'],
   ['/app/ta/verifikasi', 'Verifikasi Pendaftaran'],
@@ -49,24 +53,48 @@ const MENU_TA_S: M = [
   ['/app/ta/jadwal-sidang', 'Plot Penguji & Jadwal'],
 ];
 
-/** ═══════ Modul TA — role Dosen (pembimbing / penguji) ═══════ */
-
-const MENU_TA_D: M = [['/app/ta', 'Dashboard Dosen TA']];
+/** TA — Dosen (dinamis: pembimbing / penguji / keduanya) */
+function getMenuTaDosen(isPembimbing: boolean, isPenguji: boolean): M {
+  const menu: M = [['/app/ta', 'Dashboard Dosen']];
+  if (isPembimbing) {
+    menu.push(['/app/ta/bimbingan', 'Mahasiswa Bimbingan']);
+  }
+  if (isPenguji) {
+    menu.push(['/app/ta/jadwal-menguji', 'Jadwal Menguji']);
+    menu.push(['/app/ta/bap-sidang', 'BAP Sidang & Penilaian']);
+  }
+  return menu;
+}
 
 const MENU_TA: Record<string, M> = {
   m: MENU_TA_M,
   s: MENU_TA_S,
-  d: MENU_TA_D,
 };
+
+/* ═══════════════════════════════════════════════════════════
+   MENU MODUL PRODI (Kaprodi + Sekprodi)
+   ═══════════════════════════════════════════════════════════ */
+
+const MENU_PRODI: M = [
+  ['/app/prodi', 'Dashboard Prodi'],
+  ['/app/prodi/rekap-ta', 'Rekap Tugas Akhir'],
+  ['/app/prodi/rekap-kp', 'Rekap Kerja Praktek'],
+];
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENT
+   ═══════════════════════════════════════════════════════════ */
 
 export default function Layout() {
   const { user, mod, role, signOut } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
   const [db, upd] = useDb();
   const [open, setOpen] = useState(false);
   const [dd, setDd] = useState<'' | 'n' | 'u'>('');
   const menuRef = useRef<HTMLDivElement>(null);
 
+  /* Tutup dropdown saat klik di luar atau tekan Esc */
   useEffect(() => {
     if (!dd) return;
     const onDown = (e: MouseEvent | TouchEvent) => {
@@ -85,10 +113,39 @@ export default function Layout() {
     };
   }, [dd]);
 
+  /* Tutup sidebar setiap pindah halaman */
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
   if (!user || !role) return null;
+
   const k = role === 'mahasiswa' ? 'm' : role.startsWith('dosen') ? 'd' : 's';
-  const menu = mod === 'ta' ? MENU_TA[k] : MENU_KP[k];
-  const title = mod === 'kp' ? 'Kerja Praktek' : 'Tugas Akhir';
+
+  /* ═══ Tentukan menu ═══ */
+  let menu: M;
+  if (role === 'kaprodi' || role === 'sekprodi') {
+    menu = MENU_PRODI;
+  } else if (mod === 'ta' && k === 'd') {
+    const roles = user.roles ?? [role];
+    const isPembimbing = roles.includes('dosen_pembimbing');
+    const isPenguji = roles.includes('dosen_penguji');
+    menu = getMenuTaDosen(isPembimbing, isPenguji);
+  } else if (mod === 'ta') {
+    menu = MENU_TA[k];
+  } else {
+    menu = MENU_KP[k];
+  }
+
+  /* ═══ Tentukan judul header ═══ */
+  const title =
+    role === 'kaprodi' || role === 'sekprodi'
+      ? 'Prodi Informatika'
+      : mod === 'kp'
+      ? 'Kerja Praktek'
+      : 'Tugas Akhir';
+
+  /* ═══ Notifikasi ═══ */
   const notifs = role === 'mahasiswa' ? db.notifs : [];
   const unread = notifs.filter((n) => !n.read).length;
 
@@ -103,13 +160,16 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Overlay mobile */}
       {open && <div className="fixed inset-0 bg-black/40 z-30" onClick={() => setOpen(false)} />}
 
+      {/* ═══ SIDEBAR ═══ */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] bg-primary-700 text-white flex flex-col shadow-2xl transition-transform duration-200 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        {/* Logo */}
         <div className="p-5 flex items-center justify-between border-b border-white/10">
           <div className="flex gap-2 w-fit bg-white rounded-xl px-3 py-2 shadow-md">
             <img src="/images/logowidit.jpg" alt="Widyatama" className="h-9 object-contain" />
@@ -123,28 +183,32 @@ export default function Layout() {
             <X className="w-6 h-6" />
           </button>
         </div>
+
+        {/* Menu */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {menu.map(([to, l]) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/app' || to === '/app/ta'}
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center rounded-lg px-3 py-2.5 text-sm transition ${
+          {menu.map(([to, l]) => {
+            const isActive = location.pathname === to;
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setOpen(false)}
+                className={`flex items-center rounded-lg px-3 py-2.5 text-sm transition ${
                   isActive
                     ? 'bg-accent-500 text-white font-semibold shadow-sm'
-                    : 'text-blue-100 hover:bg-white/10'
-                }`
-              }
-            >
-              {l}
-            </NavLink>
-          ))}
+                    : 'text-blue-100 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {l}
+              </NavLink>
+            );
+          })}
         </nav>
       </aside>
 
+      {/* ═══ MAIN CONTENT ═══ */}
       <div className="flex-1 min-w-0 flex flex-col">
+        {/* Header */}
         <header className="sticky top-0 z-20 bg-primary-700 text-white min-h-16 px-3 sm:px-6 py-2 flex items-center gap-2 sm:gap-3">
           <button
             className="shrink-0 rounded-lg p-1.5 sm:p-2 hover:bg-white/10 transition"
@@ -153,6 +217,7 @@ export default function Layout() {
           >
             <Menu className="w-6 h-6" />
           </button>
+
           <div className="flex-1 min-w-0">
             <h1 className="font-bold text-sm sm:text-base leading-tight">{title}</h1>
             <p className="text-[10px] sm:text-xs text-blue-200 leading-tight">
@@ -161,6 +226,7 @@ export default function Layout() {
           </div>
 
           <div ref={menuRef} className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Notifikasi */}
             <div className="relative">
               <button
                 onClick={bell}
@@ -195,6 +261,7 @@ export default function Layout() {
               )}
             </div>
 
+            {/* Profil */}
             <div className="relative">
               <button
                 onClick={() => setDd(dd === 'u' ? '' : 'u')}
@@ -244,9 +311,12 @@ export default function Layout() {
           </div>
         </header>
 
+        {/* Main */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl w-full mx-auto">
           <Outlet />
         </main>
+
+        {/* Footer */}
         <footer className="bg-primary-700 text-white text-center text-xs py-3">
           © Made with love in Informatika
         </footer>

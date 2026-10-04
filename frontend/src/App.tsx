@@ -7,7 +7,7 @@ import { Modules } from './pages/Select';
 import { Dashboard, Register, Logbook, Completion, Extension } from './pages/kp/mahasiswa';
 import Notifications from './pages/Notifications';
 
-// ─── KP Staff (folder baru) ───
+// ─── KP Staff ───
 import {
   KpStaffDashboard,
   KpStaffVerify,
@@ -15,7 +15,7 @@ import {
   KpStaffExtension,
 } from './pages/kp/staff';
 
-// ─── KP Dosen (dari Advisees yang dipindah) ───
+// ─── KP Dosen ───
 import DosenKP from './pages/kp/dosen';
 
 // ─── TA Mahasiswa ───
@@ -37,6 +37,21 @@ import {
   TaStaffScheduleDefense,
 } from './pages/ta/staff';
 
+// ─── TA Dosen ───
+import {
+  TaDosenDashboard,
+  TaDosenAdvisees,
+  TaDosenSchedule,
+  TaDosenBAP,
+} from './pages/ta/dosen';
+
+// ─── Prodi (Kaprodi + Sekprodi) ───
+import {
+  ProdiDashboard,
+  ProdiRekapTA,
+  ProdiRekapKP,
+} from './pages/prodi';
+
 function Guard({ need, children }: { need: 'user' | 'mod' | 'role'; children: ReactElement }) {
   const a = useAuth();
   if (!a.user) return <Navigate to="/login" replace />;
@@ -51,23 +66,30 @@ function Only({ r, children }: { r: 'm' | 's' | 'd'; children: ReactElement }) {
   return k === r ? children : <Navigate to="/app" replace />;
 }
 
-/** Index /app — KP. Render sesuai role. */
+/** Index /app — KP */
 function Index() {
   const { mod, role } = useAuth();
   if (mod === 'ta') return <Navigate to="/app/ta" replace />;
 
-  // Staff/Sekprodi/Kaprodi → dashboard staff KP
+  // Kaprodi / Sekprodi → langsung ke dashboard prodi
+  if (role === 'kaprodi' || role === 'sekprodi') {
+    return <Navigate to="/app/prodi" replace />;
+  }
+
   if (role !== 'mahasiswa' && !role?.startsWith('dosen')) return <KpStaffDashboard />;
-  // Dosen → dashboard dosen KP
   if (role?.startsWith('dosen')) return <DosenKP />;
-  // Mahasiswa → dashboard mahasiswa KP
   return <Dashboard />;
 }
 
-/** Index /app/ta — render sesuai role. */
+/** Index /app/ta — dinamis per role */
 function TAIndex() {
   const { role } = useAuth();
+
+  // Kaprodi / Sekprodi → dashboard prodi
+  if (role === 'kaprodi' || role === 'sekprodi') return <ProdiDashboard />;
+
   if (role === 'mahasiswa') return <TADashboard />;
+  if (role?.startsWith('dosen')) return <TaDosenDashboard />;
   return <TaStaffDashboard />;
 }
 
@@ -141,6 +163,26 @@ export default function App() {
             <Route path="verifikasi-sidang" element={<Only r="s"><TaStaffVerifyDefense /></Only>} />
             <Route path="jadwal-sidang" element={<Only r="s"><TaStaffScheduleDefense /></Only>} />
 
+            {/* Dosen TA */}
+            <Route path="bimbingan" element={<Only r="d"><TaDosenAdvisees /></Only>} />
+            <Route path="jadwal-menguji" element={<Only r="d"><TaDosenSchedule /></Only>} />
+            <Route path="bap-sidang" element={<Only r="d"><TaDosenBAP /></Only>} />
+
+            <Route path="notifikasi" element={<Notifications />} />
+          </Route>
+
+          {/* ═══ Modul Prodi (Kaprodi + Sekprodi) ═══ */}
+          <Route
+            path="/app/prodi"
+            element={
+              <Guard need="role">
+                <Layout />
+              </Guard>
+            }
+          >
+            <Route index element={<ProdiDashboard />} />
+            <Route path="rekap-ta" element={<ProdiRekapTA />} />
+            <Route path="rekap-kp" element={<ProdiRekapKP />} />
             <Route path="notifikasi" element={<Notifications />} />
           </Route>
 

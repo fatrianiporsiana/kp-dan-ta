@@ -86,7 +86,13 @@ export function Modules() {
               </p>
 
               <div className="space-y-3">
-                {user!.roles.map((r) => (
+                {user!.roles
+                  .filter((r) => {
+                    // KP: tidak ada dosen_penguji
+                    if (mod === 'kp' && r === 'dosen_penguji') return false;
+                    return true;
+                  })
+                  .map((r) => (
                   <button
                     key={r}
                     onClick={() => {
