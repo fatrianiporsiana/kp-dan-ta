@@ -52,6 +52,13 @@ import {
   ProdiRekapKP,
 } from './pages/prodi';
 
+// ─── Forgot Password ───
+import {
+  LupaPassword,
+  VerifikasiEmail,
+  GantiPassword,
+} from './pages/ForgotPassword';
+
 function Guard({ need, children }: { need: 'user' | 'mod' | 'role'; children: ReactElement }) {
   const a = useAuth();
   if (!a.user) return <Navigate to="/login" replace />;
@@ -71,7 +78,6 @@ function Index() {
   const { mod, role } = useAuth();
   if (mod === 'ta') return <Navigate to="/app/ta" replace />;
 
-  // Kaprodi / Sekprodi → langsung ke dashboard prodi
   if (role === 'kaprodi' || role === 'sekprodi') {
     return <Navigate to="/app/prodi" replace />;
   }
@@ -85,7 +91,6 @@ function Index() {
 function TAIndex() {
   const { role } = useAuth();
 
-  // Kaprodi / Sekprodi → dashboard prodi
   if (role === 'kaprodi' || role === 'sekprodi') return <ProdiDashboard />;
 
   if (role === 'mahasiswa') return <TADashboard />;
@@ -98,7 +103,13 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* ═══ Auth ═══ */}
           <Route path="/login" element={<Login />} />
+          <Route path="/lupa-password" element={<LupaPassword />} />
+          <Route path="/verifikasi-email" element={<VerifikasiEmail />} />
+          <Route path="/ganti-password" element={<GantiPassword />} />
+
+          {/* ═══ Select Modul & Role ═══ */}
           <Route
             path="/modules"
             element={
