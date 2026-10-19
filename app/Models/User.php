@@ -101,4 +101,12 @@ class User extends Authenticatable
 
         $this->roles()->detach($role->id);
     }
+
+    public function roleNames(): array
+    {
+        return $this->roles()
+            ->pluck('name')
+            ->values()
+            ->all();
+    }
 }

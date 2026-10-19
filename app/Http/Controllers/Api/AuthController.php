@@ -36,7 +36,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Registrasi berhasil.',
             'data' => [
-                'user' => $user,
+                'user' => $this->userData($user),
                 'token' => $token,
                 'token_type' => 'Bearer',
             ],
@@ -75,7 +75,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Login berhasil.',
             'data' => [
-                'user' => $user,
+                'user' => $this->userData($user),
                 'token' => $token,
                 'token_type' => 'Bearer',
             ],
@@ -88,7 +88,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Data user berhasil diambil.',
             'data' => [
-                'user' => $request->user(),
+                'user' => $this->userData($request->user()),
             ],
         ]);
     }
@@ -101,6 +101,18 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Logout berhasil.',
         ]);
+    }
+
+    private function userData(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'nomor_induk' => $user->nomor_induk,
+            'email' => $user->email,
+            'is_active' => $user->is_active,
+            'roles' => $user->roleNames(),
+        ];
     }
 
     
