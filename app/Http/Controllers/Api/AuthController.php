@@ -18,7 +18,6 @@ class AuthController extends Controller
             'nomor_induk' => ['required', 'string', 'max:50', 'unique:users,nomor_induk'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['nullable', 'in:mahasiswa,dosen,admin'],
         ]);
 
         $user = User::create([
@@ -26,7 +25,6 @@ class AuthController extends Controller
             'nomor_induk' => $validated['nomor_induk'],
             'email' => $validated['email'],
             'password' => $validated['password'],
-            'role' => $validated['role'],
             'is_active' => true,
         ]);
 

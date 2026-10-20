@@ -3,6 +3,7 @@
 use App\Http\Controllers\DokumenKPController;
 use App\Http\Controllers\Api\PendaftaranKPController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DosenController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,11 @@ Route::prefix('auth')->group(function () {
     });
 
 });
+
+
+// Daftar dosen: mahasiswa (memilih usulan pembimbing) dan staff/sekprodi/kaprodi (menetapkan pembimbing).
+Route::middleware(['auth:sanctum', 'role:mahasiswa,staff,sekprodi,kaprodi'])
+    ->get('/dosen', [DosenController::class, 'index']);
 
 
 Route::prefix('kp')
