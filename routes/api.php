@@ -4,6 +4,7 @@ use App\Http\Controllers\DokumenKPController;
 use App\Http\Controllers\Api\PendaftaranKPController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DosenController;
+use App\Http\Controllers\Api\LogbookKPController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,11 @@ Route::prefix('kp')
         Route::post(
             '/pendaftaran/{pendaftaran}/dokumen',
             [DokumenKPController::class, 'store']);
+
+        Route::get('/logbook', [LogbookKPController::class, 'index']);
+        Route::post('/logbook', [LogbookKPController::class, 'store']);
+        Route::put('/logbook/{logbook}', [LogbookKPController::class, 'update']);
+        Route::delete('/logbook/{logbook}', [LogbookKPController::class, 'destroy']);
     });
 
 
@@ -49,6 +55,21 @@ Route::prefix('kp')
         Route::get(
             '/dosen/mahasiswa/{pendaftaran}',
             [PendaftaranKPController::class, 'showForDosen']
+        );
+
+        Route::get(
+            '/dosen/mahasiswa/{pendaftaran}/logbook',
+            [LogbookKPController::class, 'indexForDosen']
+        );
+
+        Route::patch(
+            '/dosen/logbook/{logbook}/approve',
+            [LogbookKPController::class, 'approve']
+        );
+
+        Route::patch(
+            '/dosen/logbook/{logbook}/reject',
+            [LogbookKPController::class, 'reject']
         );
     });
 
@@ -76,6 +97,11 @@ Route::prefix('kp')
         Route::get(
             '/staff/pendaftaran/{pendaftaran}',
             [PendaftaranKPController::class, 'showForStaff']
+        );
+
+        Route::get(
+            '/staff/pendaftaran/{pendaftaran}/logbook',
+            [LogbookKPController::class, 'indexForStaff']
         );
     });
 

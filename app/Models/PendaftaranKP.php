@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\DokumenKP;
+use App\Models\LogbookKP;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\PembimbingKP;
@@ -88,6 +89,14 @@ class PendaftaranKP extends Model
     {
         return $this->hasMany(
             PerpanjanganKP::class,
+            'pendaftaran_kp_id'
+        );
+    }
+
+    public function logbook(): HasMany
+    {
+        return $this->hasMany(
+            LogbookKP::class,
             'pendaftaran_kp_id'
         );
     }
