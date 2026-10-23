@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DosenController;
 use App\Http\Controllers\Api\LogbookKPController;
 use App\Http\Controllers\Api\PerpanjanganKPController;
+use App\Http\Controllers\Api\PenyelesaianKPController;
 use App\Http\Controllers\Api\DokumenKPDownloadController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
@@ -49,6 +50,10 @@ Route::prefix('kp')
         Route::put('/perpanjangan/{perpanjangan}', [PerpanjanganKPController::class, 'update']);
         Route::delete('/perpanjangan/{perpanjangan}', [PerpanjanganKPController::class, 'destroy']);
         Route::post('/perpanjangan/{perpanjangan}/dokumen', [PerpanjanganKPController::class, 'uploadScan']);
+
+        Route::get('/penyelesaian', [PenyelesaianKPController::class, 'index']);
+        Route::post('/penyelesaian/tahap-1', [PenyelesaianKPController::class, 'submitTahap1']);
+        Route::post('/penyelesaian/tahap-2', [PenyelesaianKPController::class, 'submitTahap2']);
     });
 
 
@@ -83,6 +88,21 @@ Route::prefix('kp')
         Route::get(
             '/dosen/mahasiswa/{pendaftaran}/perpanjangan',
             [PerpanjanganKPController::class, 'indexForDosen']
+        );
+
+        Route::get(
+            '/dosen/penyelesaian',
+            [PenyelesaianKPController::class, 'indexForDosen']
+        );
+
+        Route::patch(
+            '/dosen/penyelesaian/{penyelesaian}/approve',
+            [PenyelesaianKPController::class, 'dosenApprove']
+        );
+
+        Route::patch(
+            '/dosen/penyelesaian/{penyelesaian}/reject',
+            [PenyelesaianKPController::class, 'dosenReject']
         );
     });
 
@@ -130,6 +150,21 @@ Route::prefix('kp')
         Route::patch(
             '/staff/perpanjangan/{perpanjangan}/reject',
             [PerpanjanganKPController::class, 'reject']
+        );
+
+        Route::get(
+            '/staff/penyelesaian',
+            [PenyelesaianKPController::class, 'indexForStaff']
+        );
+
+        Route::patch(
+            '/staff/penyelesaian/{penyelesaian}/approve',
+            [PenyelesaianKPController::class, 'staffApprove']
+        );
+
+        Route::patch(
+            '/staff/penyelesaian/{penyelesaian}/reject',
+            [PenyelesaianKPController::class, 'staffReject']
         );
     });
 

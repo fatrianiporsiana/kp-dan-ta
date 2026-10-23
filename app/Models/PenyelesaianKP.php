@@ -15,6 +15,7 @@ class PenyelesaianKP extends Model
         'tahap',
         'status',
         'catatan',
+        'dosen_confirmed_at',
         'submitted_at',
     ];
 
@@ -22,6 +23,7 @@ class PenyelesaianKP extends Model
     {
         return [
             'tahap' => 'integer',
+            'dosen_confirmed_at' => 'datetime',
             'submitted_at' => 'datetime',
         ];
     }
