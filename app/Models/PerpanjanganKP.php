@@ -29,7 +29,10 @@ class PerpanjanganKP extends Model
 
     public function pendaftaranKP(): BelongsTo
     {
-        return $this->belongsTo(PendaftaranKP::class);
+        return $this->belongsTo(
+            PendaftaranKP::class,
+            'pendaftaran_kp_id'
+        );
     }
 
     public function dokumen(): MorphMany

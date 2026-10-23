@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\ChecksKpAccess;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LogbookKPResource;
 use App\Models\LogbookKP;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 class LogbookKPController extends Controller
 {
+    use ChecksKpAccess;
+
     /*
      * =========================================================
      * MAHASISWA
@@ -236,18 +239,6 @@ class LogbookKPController extends Controller
      * =========================================================
      */
 
-    /**
-     * Pendaftaran KP aktif = pendaftaran terbaru yang berstatus APPROVED.
-     */
-    private function activePendaftaran(int $mahasiswaId): ?PendaftaranKP
-    {
-        return PendaftaranKP::with('pembimbing')
-            ->where('mahasiswa_id', $mahasiswaId)
-            ->where('status', 'APPROVED')
-            ->latest()
-            ->first();
-    }
-
     private function listResponse(
         Request $request,
         PendaftaranKP $pendaftaran
@@ -287,43 +278,6 @@ class LogbookKPController extends Controller
     private function ownedBy(LogbookKP $logbook, int $mahasiswaId): bool
     {
         return (int) $logbook->pendaftaranKP->mahasiswa_id === $mahasiswaId;
-    }
-
-    /**
-     * Pastikan dosen yang login adalah pembimbing pendaftaran ini.
-     * Mengembalikan response error jika tidak, atau null jika boleh.
-     */
-    private function denyUnlessPembimbing(
-        Request $request,
-        PendaftaranKP $pendaftaran
-    ): ?JsonResponse {
-        $dosen = $request->user()->dosen;
-
-        if (!$dosen) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data dosen tidak ditemukan.',
-            ], 404);
-        }
-
-        $pembimbing = $pendaftaran->pembimbing;
-
-        if (!$pembimbing || (int) $pembimbing->dosen_id !== (int) $dosen->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Kamu tidak memiliki akses ke pendaftaran KP ini.',
-            ], 403);
-        }
-
-        return null;
-    }
-
-    private function mahasiswaNotFound(): JsonResponse
-    {
-        return response()->json([
-            'success' => false,
-            'message' => 'Data mahasiswa tidak ditemukan.',
-        ], 404);
     }
 
     private function forbiddenLogbook(): JsonResponse
