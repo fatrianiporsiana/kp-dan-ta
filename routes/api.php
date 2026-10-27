@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\LogbookKPController;
 use App\Http\Controllers\Api\PerpanjanganKPController;
 use App\Http\Controllers\Api\PenyelesaianKPController;
 use App\Http\Controllers\Api\DokumenKPDownloadController;
+use App\Http\Controllers\Api\PendaftaranTAController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -191,6 +192,43 @@ Route::middleware(['auth:sanctum', 'full-access'])
 // Unduh dokumen KP (akses dicek di controller: pemilik, pembimbing, atau full-access).
 Route::middleware('auth:sanctum')
     ->get('/kp/dokumen/{dokumen}/download', DokumenKPDownloadController::class);
+
+
+/*
+|--------------------------------------------------------------------------
+| MODUL TA
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('ta')
+    ->middleware(['auth:sanctum', 'role:mahasiswa'])
+    ->group(function () {
+        Route::get('/lampiran', [PendaftaranTAController::class, 'lampiran']);
+
+        Route::get('/pendaftaran', [PendaftaranTAController::class, 'show']);
+        Route::post('/pendaftaran', [PendaftaranTAController::class, 'store']);
+        Route::put('/pendaftaran/{pendaftaran}', [PendaftaranTAController::class, 'update']);
+        Route::delete('/pendaftaran/{pendaftaran}', [PendaftaranTAController::class, 'destroy']);
+        Route::post('/pendaftaran/{pendaftaran}/dokumen', [PendaftaranTAController::class, 'uploadDokumen']);
+        Route::post('/pendaftaran/{pendaftaran}/submit', [PendaftaranTAController::class, 'submit']);
+    });
+
+Route::prefix('ta')
+    ->middleware(['auth:sanctum', 'role:dosen'])
+    ->group(function () {
+        Route::get('/dosen/mahasiswa', [PendaftaranTAController::class, 'indexForDosen']);
+        Route::get('/dosen/mahasiswa/{pendaftaran}', [PendaftaranTAController::class, 'showForDosen']);
+    });
+
+Route::prefix('ta')
+    ->middleware(['auth:sanctum', 'full-access'])
+    ->group(function () {
+        Route::get('/staff/pendaftaran', [PendaftaranTAController::class, 'indexForStaff']);
+        Route::get('/staff/pendaftaran/{pendaftaran}', [PendaftaranTAController::class, 'showForStaff']);
+        Route::patch('/staff/pendaftaran/{pendaftaran}/approve', [PendaftaranTAController::class, 'approve']);
+        Route::patch('/staff/pendaftaran/{pendaftaran}/reject', [PendaftaranTAController::class, 'reject']);
+        Route::post('/staff/pendaftaran/{pendaftaran}/pembimbing', [PendaftaranTAController::class, 'assignPembimbing']);
+    });
 
 
 Route::get('/user', function (Request $request) {

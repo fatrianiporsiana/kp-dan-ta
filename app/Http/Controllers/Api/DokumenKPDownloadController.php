@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DokumenKP;
 use App\Models\PendaftaranKP;
+use App\Models\PendaftaranTA;
 use App\Models\PenyelesaianKP;
 use App\Models\PerpanjanganKP;
 use App\Models\User;
@@ -13,10 +14,11 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Unduh dokumen KP dengan pengecekan akses.
+ * Unduh dokumen KP/TA dengan pengecekan akses.
  *
  * Boleh diakses oleh: staff/sekprodi/kaprodi, mahasiswa pemilik pendaftaran,
- * dan dosen pembimbing pendaftaran tersebut.
+ * dan dosen pembimbing pendaftaran tersebut (untuk TA: pembimbing utama
+ * maupun co-pembimbing).
  *
  * Frontend harus memanggil endpoint ini dengan header Authorization (fetch/axios
  * lalu simpan sebagai blob); tautan <a href> biasa tidak membawa token.
@@ -34,7 +36,7 @@ class DokumenKPDownloadController extends Controller
             ], 403);
         }
 
-        // 'local' = disk privat (dokumen baru); 'public' = dokumen lama.
+        // 'local' = disk privat; 'public' = dokumen lama yang belum dipindahkan.
         foreach (['local', 'public'] as $disk) {
             if (Storage::disk($disk)->exists($dokumen->path)) {
                 return Storage::disk($disk)->download(
@@ -50,11 +52,11 @@ class DokumenKPDownloadController extends Controller
         ], 404);
     }
 
-    private function pendaftaranOf(DokumenKP $dokumen): ?PendaftaranKP
+    private function pendaftaranOf(DokumenKP $dokumen): PendaftaranKP|PendaftaranTA|null
     {
         $owner = $dokumen->documentable;
 
-        if ($owner instanceof PendaftaranKP) {
+        if ($owner instanceof PendaftaranKP || $owner instanceof PendaftaranTA) {
             return $owner;
         }
 
@@ -65,7 +67,7 @@ class DokumenKPDownloadController extends Controller
         return null;
     }
 
-    private function canAccess(User $user, PendaftaranKP $pendaftaran): bool
+    private function canAccess(User $user, PendaftaranKP|PendaftaranTA $pendaftaran): bool
     {
         if ($user->hasFullAccess()) {
             return true;
@@ -78,10 +80,19 @@ class DokumenKPDownloadController extends Controller
         }
 
         $dosen = $user->dosen;
+
+        if (!$dosen) {
+            return false;
+        }
+
+        if ($pendaftaran instanceof PendaftaranTA) {
+            return $pendaftaran->pembimbing()
+                ->where('dosen_id', $dosen->id)
+                ->exists();
+        }
+
         $pembimbing = $pendaftaran->pembimbing;
 
-        return $dosen
-            && $pembimbing
-            && (int) $pembimbing->dosen_id === (int) $dosen->id;
+        return $pembimbing && (int) $pembimbing->dosen_id === (int) $dosen->id;
     }
 }
