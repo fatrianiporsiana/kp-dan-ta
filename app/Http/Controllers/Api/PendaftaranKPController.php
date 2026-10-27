@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PenyelesaianKPResource;
+use App\Http\Resources\PerpanjanganKPResource;
 use App\Models\Dosen;
 use App\Models\PendaftaranKP;
 use Illuminate\Http\JsonResponse;
@@ -115,11 +117,21 @@ class PendaftaranKPController extends Controller
                     ]
                     : null,
 
-                'dokumen' => $pendaftaran->dokumen,
+                'dokumen' => $pendaftaran->dokumen
+                    ->map(fn ($dokumen) => [
+                        'id' => $dokumen->id,
+                        'jenis' => $dokumen->jenis,
+                        'nama_file' => $dokumen->nama_file,
+                        'ukuran' => $dokumen->ukuran,
+                        'mime_type' => $dokumen->mime_type,
+                    ])
+                    ->values(),
 
-                'penyelesaian' => $pendaftaran->penyelesaian,
+                'penyelesaian' => PenyelesaianKPResource::collection($pendaftaran->penyelesaian)
+                    ->resolve($request),
 
-                'perpanjangan' => $pendaftaran->perpanjangan,
+                'perpanjangan' => PerpanjanganKPResource::collection($pendaftaran->perpanjangan)
+                    ->resolve($request),
             ],
         ]);
     }

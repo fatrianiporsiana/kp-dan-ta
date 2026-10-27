@@ -53,19 +53,22 @@ class DokumenKPController extends Controller
             ->where('jenis', $validated['jenis'])
             ->first();
 
-        // Hapus file lama dari storage jika ada
+        // Hapus file lama dari storage jika ada. Dokumen lama bisa masih berada
+        // di disk 'public' sampai dipindahkan dengan: php artisan kp:pindahkan-dokumen-privat
         if ($dokumenLama) {
-            if (Storage::disk('public')->exists($dokumenLama->path)) {
-                Storage::disk('public')->delete($dokumenLama->path);
+            foreach (['local', 'public'] as $disk) {
+                if (Storage::disk($disk)->exists($dokumenLama->path)) {
+                    Storage::disk($disk)->delete($dokumenLama->path);
+                }
             }
 
             $dokumenLama->delete();
         }
 
-        // Simpan file baru
+        // Simpan file baru di disk privat (hanya bisa diunduh lewat endpoint download)
         $path = $file->store(
             'dokumen-kp/pendaftaran/' . $pendaftaran->id,
-            'public'
+            'local'
         );
 
         $dokumen = $pendaftaran->dokumen()->create([
