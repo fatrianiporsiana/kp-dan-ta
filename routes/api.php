@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PerpanjanganKPController;
 use App\Http\Controllers\Api\PenyelesaianKPController;
 use App\Http\Controllers\Api\DokumenKPDownloadController;
 use App\Http\Controllers\Api\PendaftaranTAController;
+use App\Http\Controllers\Api\PerpanjanganTAController;
 use App\Http\Controllers\Api\TemplateDokumenController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
@@ -212,6 +213,12 @@ Route::prefix('ta')
         Route::delete('/pendaftaran/{pendaftaran}', [PendaftaranTAController::class, 'destroy']);
         Route::post('/pendaftaran/{pendaftaran}/dokumen', [PendaftaranTAController::class, 'uploadDokumen']);
         Route::post('/pendaftaran/{pendaftaran}/submit', [PendaftaranTAController::class, 'submit']);
+
+        Route::get('/perpanjangan', [PerpanjanganTAController::class, 'index']);
+        Route::post('/perpanjangan', [PerpanjanganTAController::class, 'store']);
+        Route::put('/perpanjangan/{perpanjangan}', [PerpanjanganTAController::class, 'update']);
+        Route::delete('/perpanjangan/{perpanjangan}', [PerpanjanganTAController::class, 'destroy']);
+        Route::post('/perpanjangan/{perpanjangan}/dokumen', [PerpanjanganTAController::class, 'uploadScan']);
     });
 
 Route::prefix('ta')
@@ -219,6 +226,7 @@ Route::prefix('ta')
     ->group(function () {
         Route::get('/dosen/mahasiswa', [PendaftaranTAController::class, 'indexForDosen']);
         Route::get('/dosen/mahasiswa/{pendaftaran}', [PendaftaranTAController::class, 'showForDosen']);
+        Route::get('/dosen/mahasiswa/{pendaftaran}/perpanjangan', [PerpanjanganTAController::class, 'indexForDosen']);
     });
 
 Route::prefix('ta')
@@ -229,6 +237,10 @@ Route::prefix('ta')
         Route::patch('/staff/pendaftaran/{pendaftaran}/approve', [PendaftaranTAController::class, 'approve']);
         Route::patch('/staff/pendaftaran/{pendaftaran}/reject', [PendaftaranTAController::class, 'reject']);
         Route::post('/staff/pendaftaran/{pendaftaran}/pembimbing', [PendaftaranTAController::class, 'assignPembimbing']);
+
+        Route::get('/staff/perpanjangan', [PerpanjanganTAController::class, 'indexForStaff']);
+        Route::patch('/staff/perpanjangan/{perpanjangan}/approve', [PerpanjanganTAController::class, 'approve']);
+        Route::patch('/staff/perpanjangan/{perpanjangan}/reject', [PerpanjanganTAController::class, 'reject']);
     });
 
 

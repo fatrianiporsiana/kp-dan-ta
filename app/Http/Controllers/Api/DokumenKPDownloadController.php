@@ -8,6 +8,7 @@ use App\Models\PendaftaranKP;
 use App\Models\PendaftaranTA;
 use App\Models\PenyelesaianKP;
 use App\Models\PerpanjanganKP;
+use App\Models\PerpanjanganTA;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -62,6 +63,10 @@ class DokumenKPDownloadController extends Controller
 
         if ($owner instanceof PerpanjanganKP || $owner instanceof PenyelesaianKP) {
             return $owner->pendaftaranKP;
+        }
+
+        if ($owner instanceof PerpanjanganTA) {
+            return $owner->pendaftaranTA;
         }
 
         return null;

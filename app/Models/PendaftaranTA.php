@@ -69,6 +69,11 @@ class PendaftaranTA extends Model
         return $this->hasMany(PembimbingTA::class, 'pendaftaran_ta_id');
     }
 
+    public function perpanjangan(): HasMany
+    {
+        return $this->hasMany(PerpanjanganTA::class, 'pendaftaran_ta_id');
+    }
+
     public function dokumen(): MorphMany
     {
         return $this->morphMany(DokumenKP::class, 'documentable');
