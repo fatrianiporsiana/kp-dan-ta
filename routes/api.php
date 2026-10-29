@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PenyelesaianKPController;
 use App\Http\Controllers\Api\DokumenKPDownloadController;
 use App\Http\Controllers\Api\PendaftaranTAController;
 use App\Http\Controllers\Api\PerpanjanganTAController;
+use App\Http\Controllers\Api\PengajuanSidangTAController;
 use App\Http\Controllers\Api\TemplateDokumenController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
@@ -219,6 +220,14 @@ Route::prefix('ta')
         Route::put('/perpanjangan/{perpanjangan}', [PerpanjanganTAController::class, 'update']);
         Route::delete('/perpanjangan/{perpanjangan}', [PerpanjanganTAController::class, 'destroy']);
         Route::post('/perpanjangan/{perpanjangan}/dokumen', [PerpanjanganTAController::class, 'uploadScan']);
+
+        Route::get('/sidang/lampiran', [PengajuanSidangTAController::class, 'lampiran']);
+        Route::get('/sidang', [PengajuanSidangTAController::class, 'show']);
+        Route::post('/sidang', [PengajuanSidangTAController::class, 'store']);
+        Route::put('/sidang/{sidang}', [PengajuanSidangTAController::class, 'update']);
+        Route::delete('/sidang/{sidang}', [PengajuanSidangTAController::class, 'destroy']);
+        Route::post('/sidang/{sidang}/dokumen', [PengajuanSidangTAController::class, 'uploadDokumen']);
+        Route::post('/sidang/{sidang}/submit', [PengajuanSidangTAController::class, 'submit']);
     });
 
 Route::prefix('ta')
@@ -227,6 +236,11 @@ Route::prefix('ta')
         Route::get('/dosen/mahasiswa', [PendaftaranTAController::class, 'indexForDosen']);
         Route::get('/dosen/mahasiswa/{pendaftaran}', [PendaftaranTAController::class, 'showForDosen']);
         Route::get('/dosen/mahasiswa/{pendaftaran}/perpanjangan', [PerpanjanganTAController::class, 'indexForDosen']);
+
+        Route::get('/dosen/sidang', [PengajuanSidangTAController::class, 'indexForDosen']);
+        Route::get('/dosen/sidang/{sidang}', [PengajuanSidangTAController::class, 'showForDosen']);
+        Route::patch('/dosen/sidang/{sidang}/approve', [PengajuanSidangTAController::class, 'dosenApprove']);
+        Route::patch('/dosen/sidang/{sidang}/reject', [PengajuanSidangTAController::class, 'dosenReject']);
     });
 
 Route::prefix('ta')
@@ -241,6 +255,11 @@ Route::prefix('ta')
         Route::get('/staff/perpanjangan', [PerpanjanganTAController::class, 'indexForStaff']);
         Route::patch('/staff/perpanjangan/{perpanjangan}/approve', [PerpanjanganTAController::class, 'approve']);
         Route::patch('/staff/perpanjangan/{perpanjangan}/reject', [PerpanjanganTAController::class, 'reject']);
+
+        Route::get('/staff/sidang', [PengajuanSidangTAController::class, 'indexForStaff']);
+        Route::get('/staff/sidang/{sidang}', [PengajuanSidangTAController::class, 'showForStaff']);
+        Route::patch('/staff/sidang/{sidang}/approve', [PengajuanSidangTAController::class, 'staffApprove']);
+        Route::patch('/staff/sidang/{sidang}/reject', [PengajuanSidangTAController::class, 'staffReject']);
     });
 
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DokumenKP;
 use App\Models\PendaftaranKP;
 use App\Models\PendaftaranTA;
+use App\Models\PengajuanSidangTA;
 use App\Models\PenyelesaianKP;
 use App\Models\PerpanjanganKP;
 use App\Models\PerpanjanganTA;
@@ -65,7 +66,7 @@ class DokumenKPDownloadController extends Controller
             return $owner->pendaftaranKP;
         }
 
-        if ($owner instanceof PerpanjanganTA) {
+        if ($owner instanceof PerpanjanganTA || $owner instanceof PengajuanSidangTA) {
             return $owner->pendaftaranTA;
         }
 
