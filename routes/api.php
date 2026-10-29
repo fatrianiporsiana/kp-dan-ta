@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PerpanjanganKPController;
 use App\Http\Controllers\Api\PenyelesaianKPController;
 use App\Http\Controllers\Api\DokumenKPDownloadController;
 use App\Http\Controllers\Api\PendaftaranTAController;
+use App\Http\Controllers\Api\TemplateDokumenController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -228,6 +229,27 @@ Route::prefix('ta')
         Route::patch('/staff/pendaftaran/{pendaftaran}/approve', [PendaftaranTAController::class, 'approve']);
         Route::patch('/staff/pendaftaran/{pendaftaran}/reject', [PendaftaranTAController::class, 'reject']);
         Route::post('/staff/pendaftaran/{pendaftaran}/pembimbing', [PendaftaranTAController::class, 'assignPembimbing']);
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| TEMPLATE DOKUMEN (kuesioner KP, logbook TA, BAP sidang, dll)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/templates', [TemplateDokumenController::class, 'index']);
+    Route::get('/templates/{template}/download', [TemplateDokumenController::class, 'download']);
+});
+
+Route::prefix('staff')
+    ->middleware(['auth:sanctum', 'full-access'])
+    ->group(function () {
+        Route::post('/templates', [TemplateDokumenController::class, 'store']);
+        Route::patch('/templates/{template}', [TemplateDokumenController::class, 'update']);
+        Route::post('/templates/{template}/file', [TemplateDokumenController::class, 'replaceFile']);
+        Route::delete('/templates/{template}', [TemplateDokumenController::class, 'destroy']);
     });
 
 
