@@ -19,3 +19,6 @@ storage/framework/sessions/*
 storage/framework/views/*
 
 docker-compose.override.yml
+public/storage
+storage/app/private/*
+storage/app/public/*
