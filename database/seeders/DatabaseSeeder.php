@@ -29,9 +29,57 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->seedAccount(
+            name: 'Test User 2',
+            email: 'user2@user2.com',
+            nomorInduk: '2210002',
+            password: 'user123',
+            roles: ['mahasiswa'],
+        );
+
+        $this->seedAccount(
             name: 'Test Dosen',
             email: 'dosen@dosen.com',
             nomorInduk: '1980001',
+            password: 'dosen123',
+            roles: ['dosen'],
+        );
+
+        $this->seedAccount(
+            name: 'Test Dosen 2',
+            email: 'dosen2@dosen2.com',
+            nomorInduk: '1980002',
+            password: 'dosen123',
+            roles: ['dosen'],
+        );
+
+        $this->seedAccount(
+            name: 'Test Dosen 3',
+            email: 'tdosen3@tdosen3.com',
+            nomorInduk: '1980003',
+            password: 'dosen123',
+            roles: ['dosen'],
+        );
+
+        $this->seedAccount(
+            name: 'Test Dosen 4',
+            email: 'dosen4@dosen4.com',
+            nomorInduk: '1980004',
+            password: 'dosen123',
+            roles: ['dosen'],
+        );
+
+        $this->seedAccount(
+            name: 'Test Dosen 5',
+            email: 'dosen5@dosen5.com',
+            nomorInduk: '1980005',
+            password: 'dosen123',
+            roles: ['dosen'],
+        );
+
+        $this->seedAccount(
+            name: 'Test Dosen 6',
+            email: 'dosen6@dosen6.com',
+            nomorInduk: '1980006',
             password: 'dosen123',
             roles: ['dosen'],
         );

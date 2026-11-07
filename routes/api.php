@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\DokumenKPDownloadController;
 use App\Http\Controllers\Api\PendaftaranTAController;
 use App\Http\Controllers\Api\PerpanjanganTAController;
 use App\Http\Controllers\Api\PengajuanSidangTAController;
+use App\Http\Controllers\Api\JadwalSidangTAController;
 use App\Http\Controllers\Api\TemplateDokumenController;
 use App\Http\Controllers\Api\Staff\UserRoleController;
 use Illuminate\Http\Request;
@@ -241,6 +242,9 @@ Route::prefix('ta')
         Route::get('/dosen/sidang/{sidang}', [PengajuanSidangTAController::class, 'showForDosen']);
         Route::patch('/dosen/sidang/{sidang}/approve', [PengajuanSidangTAController::class, 'dosenApprove']);
         Route::patch('/dosen/sidang/{sidang}/reject', [PengajuanSidangTAController::class, 'dosenReject']);
+
+        Route::get('/penguji/jadwal', [JadwalSidangTAController::class, 'jadwalPenguji']);
+        Route::get('/penguji/jadwal/{jadwal}', [JadwalSidangTAController::class, 'detailPenguji']);
     });
 
 Route::prefix('ta')
@@ -260,6 +264,11 @@ Route::prefix('ta')
         Route::get('/staff/sidang/{sidang}', [PengajuanSidangTAController::class, 'showForStaff']);
         Route::patch('/staff/sidang/{sidang}/approve', [PengajuanSidangTAController::class, 'staffApprove']);
         Route::patch('/staff/sidang/{sidang}/reject', [PengajuanSidangTAController::class, 'staffReject']);
+
+        Route::get('/staff/siap-diuji', [JadwalSidangTAController::class, 'siapDiuji']);
+        Route::post('/staff/sidang/{sidang}/jadwal/cek', [JadwalSidangTAController::class, 'cekBentrok']);
+        Route::put('/staff/sidang/{sidang}/jadwal', [JadwalSidangTAController::class, 'simpan']);
+        Route::delete('/staff/sidang/{sidang}/jadwal', [JadwalSidangTAController::class, 'hapus']);
     });
 
 

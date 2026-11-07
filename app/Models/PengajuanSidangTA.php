@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PengajuanSidangTA extends Model
@@ -45,6 +46,11 @@ class PengajuanSidangTA extends Model
     public function pendaftaranTA(): BelongsTo
     {
         return $this->belongsTo(PendaftaranTA::class, 'pendaftaran_ta_id');
+    }
+
+    public function jadwal(): HasOne
+    {
+        return $this->hasOne(JadwalSidangTA::class, 'pengajuan_sidang_ta_id');
     }
 
     public function dokumen(): MorphMany

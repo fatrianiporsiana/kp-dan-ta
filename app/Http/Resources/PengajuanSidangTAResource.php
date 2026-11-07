@@ -69,6 +69,21 @@ class PengajuanSidangTAResource extends JsonResource
                 ]
             ),
 
+            // Jadwal dan dosen penguji (null sampai staff menetapkannya).
+            'jadwal' => $this->whenLoaded('jadwal', fn () => [
+                'id' => $this->jadwal->id,
+                'tanggal' => $this->jadwal->tanggal->format('Y-m-d'),
+                'waktu_mulai' => substr((string) $this->jadwal->waktu_mulai, 0, 5),
+                'waktu_selesai' => substr((string) $this->jadwal->waktu_selesai, 0, 5),
+                'ruang' => $this->jadwal->ruang,
+                'dosen_penguji' => $this->jadwal->penguji
+                    ->map(fn ($penguji) => [
+                        'urutan' => $penguji->urutan,
+                    ] + (self::dosen($penguji->dosen) ?? []))
+                    ->values()
+                    ->all(),
+            ]),
+
             // path file sengaja tidak ditampilkan; unduh lewat endpoint download.
             'dokumen' => $this->whenLoaded('dokumen', fn () => $this->dokumen
                 ->map(fn ($dokumen) => [

@@ -7,6 +7,7 @@ use App\Models\DokumenKP;
 use App\Models\PendaftaranKP;
 use App\Models\PendaftaranTA;
 use App\Models\PengajuanSidangTA;
+use App\Models\PengujiTA;
 use App\Models\PenyelesaianKP;
 use App\Models\PerpanjanganKP;
 use App\Models\PerpanjanganTA;
@@ -30,8 +31,12 @@ class DokumenKPDownloadController extends Controller
     public function __invoke(Request $request, DokumenKP $dokumen): Response
     {
         $pendaftaran = $this->pendaftaranOf($dokumen);
+        $user = $request->user();
 
-        if (!$pendaftaran || !$this->canAccess($request->user(), $pendaftaran)) {
+        $diizinkan = ($pendaftaran && $this->canAccess($user, $pendaftaran))
+            || $this->pengujiBolehMembaca($user, $dokumen);
+
+        if (!$diizinkan) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kamu tidak memiliki akses ke dokumen ini.',
@@ -52,6 +57,31 @@ class DokumenKPDownloadController extends Controller
             'success' => false,
             'message' => 'File dokumen tidak ditemukan.',
         ], 404);
+    }
+
+    /**
+     * Dosen penguji hanya boleh membaca draf laporan (atau jurnal) mahasiswa
+     * yang diujinya, bukan seluruh lampiran (akte, histori pembayaran, dll).
+     */
+    private function pengujiBolehMembaca(User $user, DokumenKP $dokumen): bool
+    {
+        $dosen = $user->dosen;
+        $owner = $dokumen->documentable;
+
+        if (
+            !$dosen
+            || !$owner instanceof PengajuanSidangTA
+            || !in_array($dokumen->jenis, JadwalSidangTAController::LAMPIRAN_UNTUK_PENGUJI, true)
+        ) {
+            return false;
+        }
+
+        return PengujiTA::query()
+            ->where('dosen_id', $dosen->id)
+            ->whereHas('jadwal', function ($jadwal) use ($owner) {
+                $jadwal->where('pengajuan_sidang_ta_id', $owner->id);
+            })
+            ->exists();
     }
 
     private function pendaftaranOf(DokumenKP $dokumen): PendaftaranKP|PendaftaranTA|null

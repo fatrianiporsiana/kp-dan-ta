@@ -30,6 +30,7 @@ class PengajuanSidangTAController extends Controller
         'pendaftaranTA.mahasiswa.user',
         'pendaftaranTA.pembimbing.dosen.user',
         'dokumen',
+        'jadwal.penguji.dosen.user',
     ];
 
     /*
